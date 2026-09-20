@@ -1,8 +1,8 @@
-﻿import React, { useState, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import { Task, DayOfWeek } from "./types";
 import { ActiveTaskView } from "./components/ActiveTaskView";
 import { RoutineEditor } from "./components/RoutineEditor";
-import { useSchedule } from "./hooks/useSchedule";
+import { useSchedule, getTodayDayOfWeek } from "./hooks/useSchedule";
 import {
   Edit3,
   Clock,
@@ -12,6 +12,7 @@ import {
   Info,
 } from "lucide-react";
 import { IntroductionView } from "./components/IntroductionView";
+import aesLnlbes from "./assets/aes/aes_lnlbes.jpg";
 
 const SkeletonTask = () => (
   <div className="animate-pulse flex flex-col gap-4 p-8 h-full justify-center items-center">
@@ -31,7 +32,7 @@ const SHORT_DAY_NAMES: Record<string, string> = {
   Sunday: "Su",
 };
 
-export const NotCuteAnymore: React.FC = () => {
+export const VonClock: React.FC = () => {
   const {
     currentDay,
     setCurrentDay,
@@ -56,7 +57,12 @@ export const NotCuteAnymore: React.FC = () => {
         import: "default",
       },
     );
-    return Object.values(images) as string[];
+    // Exclude album cover assets so notes section only uses aes_lnlbes
+    const filtered = Object.entries(images)
+      .filter(([path]) => !path.toLowerCase().includes("yunah"))
+      .map(([, url]) => url as string);
+
+    return filtered.length > 0 ? filtered : [aesLnlbes];
   }, []);
 
   const activeTask = useMemo(() => {
@@ -65,7 +71,7 @@ export const NotCuteAnymore: React.FC = () => {
     const nowInMinutes = nowHours * 60 + nowMins;
 
     return (
-      currentDayTasks.find((task) => {
+      (currentDayTasks || []).find((task) => {
         const [startH, startM] = task.startTime.split(":").map(Number);
         const startInMinutes = startH * 60 + startM;
         const endInMinutes = startInMinutes + task.durationMinutes;
@@ -75,11 +81,11 @@ export const NotCuteAnymore: React.FC = () => {
   }, [currentDayTasks, currentTime]);
 
   const currentBackgroundImage = useMemo(() => {
-    if (backgroundImages.length === 0) return "";
+    if (backgroundImages.length === 0) return aesLnlbes;
 
     if (!activeTask) {
       // default idle image (first one)
-      return backgroundImages[0];
+      return backgroundImages[0] || aesLnlbes;
     }
 
     // stable selection logic
@@ -89,7 +95,7 @@ export const NotCuteAnymore: React.FC = () => {
       .reduce((acc, char) => acc + char.charCodeAt(0), 0);
 
     const index = seed % backgroundImages.length;
-    return backgroundImages[index];
+    return backgroundImages[index] || aesLnlbes;
   }, [activeTask, backgroundImages]);
 
   const handleSaveRoutine = (newTasks: Task[]) => {
@@ -105,8 +111,7 @@ export const NotCuteAnymore: React.FC = () => {
   };
 
   const isToday = useMemo(() => {
-    const today = new Date().toLocaleDateString("en-US", { weekday: "long" });
-    return currentDay === today;
+    return currentDay === getTodayDayOfWeek();
   }, [currentDay]);
 
   const showEditor = !isToday;
@@ -119,7 +124,7 @@ export const NotCuteAnymore: React.FC = () => {
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
             <img
-              src="assets/logo/notcuteanymore_logo.svg"
+              src="assets/logo/von_clock_logo.svg"
               style={{ filter: "invert(1)", width: "100px", opacity: 0.8 }}
               alt=""
             />
@@ -154,10 +159,7 @@ export const NotCuteAnymore: React.FC = () => {
             <div className="flex items-center gap-4 pl-0 lg:pl-8">
               <button
                 onClick={() => {
-                  const today = new Date().toLocaleDateString("en-US", {
-                    weekday: "long",
-                  }) as DayOfWeek;
-                  setCurrentDay(today);
+                  setCurrentDay(getTodayDayOfWeek());
                 }}
                 className="group flex items-center gap-2 px-3 py-1.5 hover:bg-white/5 rounded-lg transition-all"
               >
@@ -246,5 +248,3 @@ export const NotCuteAnymore: React.FC = () => {
     </div>
   );
 };
-
-

@@ -1,4 +1,4 @@
-﻿import React from "react";
+import React from "react";
 import { Minus, Square, X, EyeClosed } from "lucide-react";
 
 export const TitleBar: React.FC = () => {
@@ -11,7 +11,7 @@ export const TitleBar: React.FC = () => {
           <EyeClosed size={14} />
         </div>
         <span className="text-xs font-mono font-medium tracking-wider text-neutral-300">
-          NOT CUTE ANYMORE <span className="text-white/30 text-[10px]">v1.0.0</span>
+          VON.CLOCK <span className="text-white/30 text-[10px]">v1.0.0</span>
         </span>
       </div>
 

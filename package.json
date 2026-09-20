@@ -1,8 +1,8 @@
-﻿{
-  "name": "not-cute-anymore-desktop",
+{
+  "name": "von-clock-desktop",
   "private": true,
   "version": "1.0.0",
-  "description": "Not Cute Anymore - Standalone Daily Execution & Routine Management Desktop App",
+  "description": "VON.CLOCK - Standalone Daily Execution & Routine Management Desktop App",
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite",

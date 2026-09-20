@@ -1,4 +1,4 @@
-﻿# Not Cute Anymore (Desktop)
+# VON.CLOCK (Desktop)
 
 A standalone daily routine execution queue, quest logger, and productivity dashboard built with **Electron**, **React 19**, and **Tailwind CSS**.
 

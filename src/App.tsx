@@ -1,15 +1,17 @@
-﻿import React, { useState } from "react";
+import React, { useState } from "react";
 import { TitleBar } from "./components/TitleBar";
-import { NotCuteAnymore } from "./NotCuteAnymore";
-import { NotCuteAnymoreSidebar } from "./NotCuteAnymoreSidebar";
+import { VonClock } from "./VonClock";
+import { VonClockSidebar } from "./VonClockSidebar";
 import { PanelLeftClose, PanelLeftOpen } from "lucide-react";
+import { ScheduleProvider } from "./hooks/useSchedule";
 
 export const App: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
   return (
-    <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#09090b] text-white">
-      <TitleBar />
+    <ScheduleProvider>
+      <div className="flex flex-col h-screen w-screen overflow-hidden bg-[#09090b] text-white">
+        <TitleBar />
 
       <div className="flex-1 flex overflow-hidden relative">
         {/* Collapsible Sidebar */}
@@ -19,7 +21,7 @@ export const App: React.FC = () => {
           }`}
         >
           <div className="flex-1 overflow-hidden relative">
-            <NotCuteAnymoreSidebar />
+            <VonClockSidebar />
           </div>
         </aside>
 
@@ -43,11 +45,12 @@ export const App: React.FC = () => {
           </div>
 
           <div className="flex-1 relative overflow-hidden">
-            <NotCuteAnymore />
+            <VonClock />
           </div>
         </main>
       </div>
     </div>
+    </ScheduleProvider>
   );
 };
 

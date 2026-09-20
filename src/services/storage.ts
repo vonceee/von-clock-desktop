@@ -1,4 +1,4 @@
-﻿import { Task, DailyRoutines, DayOfWeek } from "../types";
+import { Task, DailyRoutines, DayOfWeek } from "../types";
 
 declare global {
   interface Window {
@@ -13,12 +13,24 @@ declare global {
   }
 }
 
+const STORAGE_KEY_ROUTINES = "von_clock_routines";
+const LEGACY_STORAGE_KEY_ROUTINES = "nca_routines";
+const STORAGE_KEY_LOGS = "von_clock_logs";
+const LEGACY_STORAGE_KEY_LOGS = "nca_logs";
+
 export const routineStorage = {
   async fetchRoutines(): Promise<DailyRoutines | null> {
     if (window.electronAPI) {
       return await window.electronAPI.getStorage("routines");
     }
-    const local = localStorage.getItem("nca_routines");
+    let local = localStorage.getItem(STORAGE_KEY_ROUTINES);
+    if (!local) {
+      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY_ROUTINES);
+      if (legacy) {
+        local = legacy;
+        localStorage.setItem(STORAGE_KEY_ROUTINES, legacy);
+      }
+    }
     return local ? JSON.parse(local) : null;
   },
 
@@ -26,12 +38,13 @@ export const routineStorage = {
     if (window.electronAPI) {
       await window.electronAPI.setStorage("routines", routines);
     } else {
-      localStorage.setItem("nca_routines", JSON.stringify(routines));
+      localStorage.setItem(STORAGE_KEY_ROUTINES, JSON.stringify(routines));
     }
   },
 
   async saveDayRoutine(day: DayOfWeek, tasks: Task[]): Promise<void> {
-    const existing = (await this.fetchRoutines()) || {
+    const existing = (await this.fetchRoutines()) || {};
+    const base: DailyRoutines = {
       Monday: [],
       Tuesday: [],
       Wednesday: [],
@@ -39,16 +52,24 @@ export const routineStorage = {
       Friday: [],
       Saturday: [],
       Sunday: [],
+      ...existing,
     };
-    existing[day] = tasks;
-    await this.saveRoutines(existing);
+    base[day] = tasks;
+    await this.saveRoutines(base);
   },
 
   async fetchLogs(): Promise<any[]> {
     if (window.electronAPI) {
       return (await window.electronAPI.getStorage("logs")) || [];
     }
-    const local = localStorage.getItem("nca_logs");
+    let local = localStorage.getItem(STORAGE_KEY_LOGS);
+    if (!local) {
+      const legacy = localStorage.getItem(LEGACY_STORAGE_KEY_LOGS);
+      if (legacy) {
+        local = legacy;
+        localStorage.setItem(STORAGE_KEY_LOGS, legacy);
+      }
+    }
     return local ? JSON.parse(local) : [];
   },
 
@@ -64,7 +85,7 @@ export const routineStorage = {
     if (window.electronAPI) {
       await window.electronAPI.setStorage("logs", trimmed);
     } else {
-      localStorage.setItem("nca_logs", JSON.stringify(trimmed));
+      localStorage.setItem(STORAGE_KEY_LOGS, JSON.stringify(trimmed));
     }
   },
 };

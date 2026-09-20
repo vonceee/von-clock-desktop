@@ -1,31 +1,6 @@
 import React from "react";
 import { X, Plus, Trash2, Save, Copy, Check } from "lucide-react";
-
-enum TaskStatus {
-  PENDING = "PENDING",
-  ACTIVE = "ACTIVE",
-  COMPLETED = "COMPLETED",
-}
-
-type DayOfWeek =
-  | "Monday"
-  | "Tuesday"
-  | "Wednesday"
-  | "Thursday"
-  | "Friday"
-  | "Saturday"
-  | "Sunday";
-
-interface Task {
-  id: string;
-  title: string;
-  notes: string;
-  startTime: string;
-  durationMinutes: number;
-  status: TaskStatus;
-  dependencies: string[];
-  requirements: string[];
-}
+import { Task, TaskStatus, DayOfWeek } from "../types";
 
 interface RoutineEditorProps {
   day: DayOfWeek;
@@ -44,12 +19,14 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
   onClose,
   isEmbedded = false,
 }) => {
-  const [localTasks, setLocalTasks] = React.useState<Task[]>([...tasks]);
+  const [localTasks, setLocalTasks] = React.useState<Task[]>([
+    ...(tasks || []),
+  ]);
   const [isCopyMode, setIsCopyMode] = React.useState(false);
   const [selectedDays, setSelectedDays] = React.useState<DayOfWeek[]>([]);
 
   React.useEffect(() => {
-    setLocalTasks([...tasks]);
+    setLocalTasks([...(tasks || [])]);
   }, [tasks]);
 
   const ALL_DAYS: DayOfWeek[] = [

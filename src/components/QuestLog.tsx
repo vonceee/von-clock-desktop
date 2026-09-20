@@ -28,7 +28,7 @@ export const QuestLog: React.FC<QuestLogProps> = ({
     return "PENDING";
   };
 
-  const sortedTasks = [...tasks].sort((a, b) => {
+  const sortedTasks = [...(tasks || [])].sort((a, b) => {
     const statusA = getTaskStatus(a);
     const statusB = getTaskStatus(b);
 

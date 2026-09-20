@@ -1,11 +1,11 @@
-﻿import { useState, useEffect, useMemo, useCallback } from "react";
+import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { Task, TaskStatus, DailyRoutines, DayOfWeek } from "../types";
 import { routineStorage as routineApi } from "../services/storage";
 
 export const DEFAULT_TASKS: Task[] = [
   {
     id: "1",
-    title: "Welcome to NCA",
+    title: "Welcome to VON.CLOCK",
     notes: "This is your daily execution queue. Click 'Edit Routine' to begin.",
     startTime: "09:00",
     durationMinutes: 1440,
@@ -58,17 +58,24 @@ export const DAYS: DayOfWeek[] = [
   "Sunday",
 ];
 
-export const useSchedule = () => {
+export const getTodayDayOfWeek = (): DayOfWeek => {
+  const dayNames: DayOfWeek[] = [
+    "Sunday",
+    "Monday",
+    "Tuesday",
+    "Wednesday",
+    "Thursday",
+    "Friday",
+    "Saturday",
+  ];
+  return dayNames[new Date().getDay()];
+};
+
+const useScheduleState = () => {
   // --- State ---
   const [routines, setRoutines] = useState<DailyRoutines>(INITIAL_ROUTINES);
   const [isLoading, setIsLoading] = useState(true);
-
-  const [currentDay, setCurrentDay] = useState<DayOfWeek>(() => {
-    return new Date().toLocaleDateString("en-US", {
-      weekday: "long",
-    }) as DayOfWeek;
-  });
-
+  const [currentDay, setCurrentDay] = useState<DayOfWeek>(getTodayDayOfWeek);
   const [currentTime, setCurrentTime] = useState(new Date());
 
   // --- Effects ---
@@ -85,15 +92,18 @@ export const useSchedule = () => {
       try {
         const data = await routineApi.fetchRoutines();
 
-        // check if the fetched data effectively has no tasks
-        const hasData = Object.values(data).some((tasks) => tasks.length > 0);
+        if (data) {
+          const merged: DailyRoutines = {
+            ...INITIAL_ROUTINES,
+            ...data,
+          };
+          const hasData = Object.values(merged).some((tasks) => tasks && tasks.length > 0);
 
-        if (hasData) {
-          setRoutines(data);
-        } else {
-          // if no data, we keep the INITIAL_ROUTINES which contains the onboarding info.
-          // no action needed effectively, but explicit comment helps.
-          console.log("No remote data found, using onboarding defaults.");
+          if (hasData) {
+            setRoutines(merged);
+          } else {
+            console.log("No remote data found, using onboarding defaults.");
+          }
         }
       } catch (error) {
         console.error("Failed to load routines:", error);
@@ -104,13 +114,17 @@ export const useSchedule = () => {
     loadRoutines();
   }, []);
 
-  // window event listener for synchronization (frontend-only sync, maybe deprecated if API is truth)
-  // keeping it for now if we want optimistic UI updates across components
+  // window event listener for synchronization
   useEffect(() => {
     const handleScheduleUpdate = async () => {
       try {
         const data = await routineApi.fetchRoutines();
-        setRoutines(data);
+        if (data) {
+          setRoutines((prev) => ({
+            ...prev,
+            ...data,
+          }));
+        }
       } catch (error) {
         console.error("Failed to sync routines:", error);
       }
@@ -125,7 +139,7 @@ export const useSchedule = () => {
   // --- Computed ---
 
   const currentDayTasks = useMemo(
-    () => routines[currentDay],
+    () => routines[currentDay] || [],
     [routines, currentDay]
   );
 
@@ -133,34 +147,28 @@ export const useSchedule = () => {
 
   const saveDayRoutine = useCallback(
     async (newTasks: Task[]) => {
-      // ensure we are only touching the `currentDay` and deep cloning tasks to prevent ref leakage
       const tasksToSave = JSON.parse(JSON.stringify(newTasks));
 
       try {
-        // optimistic update
         setRoutines((prev) => ({
           ...prev,
           [currentDay]: tasksToSave,
         }));
 
-        // persist to backend
-        await routineApi.saveRoutine(currentDay, tasksToSave);
+        await routineApi.saveDayRoutine(currentDay, tasksToSave);
+        window.dispatchEvent(new Event("schedule-update"));
       } catch (error) {
         console.error("Failed to save routine:", error);
-        // revert optimistic update?
-        // for MVP, we might just log error.
       }
     },
-    [routines, currentDay]
+    [currentDay]
   );
 
   const copyRoutineToDays = useCallback(
     async (sourceTasks: Task[], targetDays: DayOfWeek[]) => {
-      // Batch Copy
       const tasksToSave = JSON.parse(JSON.stringify(sourceTasks));
 
       try {
-        // optimistic update for all targets
         setRoutines((prev) => {
           const newRoutines = { ...prev };
           targetDays.forEach((day) => {
@@ -169,17 +177,13 @@ export const useSchedule = () => {
           return newRoutines;
         });
 
-        // Backend Persistence (Parallel Requests)
-        // note: for large batches/users, a batch API endpoint would be better,
-        // but for <10 items x 7 days, parallel requests are acceptable for MVP.
         await Promise.all(
-          targetDays.map((day) => routineApi.saveRoutine(day, tasksToSave))
+          targetDays.map((day) => routineApi.saveDayRoutine(day, tasksToSave))
         );
 
         window.dispatchEvent(new Event("schedule-update"));
       } catch (error) {
         console.error("Failed to copy routine:", error);
-        // in a real app, we'd revert or show a toast
       }
     },
     []
@@ -198,5 +202,26 @@ export const useSchedule = () => {
     INITIAL_ROUTINES,
     DAYS,
   };
+};
+
+export type ScheduleContextType = ReturnType<typeof useScheduleState>;
+
+const ScheduleContext = createContext<ScheduleContextType | null>(null);
+
+export const ScheduleProvider: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}) => {
+  const schedule = useScheduleState();
+  return (
+    <ScheduleContext.Provider value={schedule}>
+      {children}
+    </ScheduleContext.Provider>
+  );
+};
+
+export const useSchedule = (): ScheduleContextType => {
+  const context = useContext(ScheduleContext);
+  if (context) return context;
+  return useScheduleState();
 };
 

@@ -2,7 +2,7 @@ import React from "react";
 import { useSchedule } from "./hooks/useSchedule";
 import { QuestLog } from "./components/QuestLog";
 
-export const NotCuteAnymoreSidebar: React.FC = () => {
+export const VonClockSidebar: React.FC = () => {
   const { currentDayTasks, currentTime, isLoading } = useSchedule();
 
   return (

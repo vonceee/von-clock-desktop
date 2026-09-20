@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Task } from "../types";
 import { ListChecks, Play, Zap, Edit2, Eye } from "lucide-react";
+import aesLnlbes from "../assets/aes/aes_lnlbes.jpg";
 
 interface ActiveTaskViewProps {
   task: Task | null;
@@ -11,7 +12,7 @@ interface ActiveTaskViewProps {
 export const ActiveTaskView: React.FC<ActiveTaskViewProps> = ({
   task,
   onUpdateTask,
-  backgroundImage,
+  backgroundImage = aesLnlbes,
 }) => {
   const [percentDone, setPercentDone] = useState<number>(0);
   const [timeLeft, setTimeLeft] = useState<string>("00:00");
@@ -143,10 +144,10 @@ export const ActiveTaskView: React.FC<ActiveTaskViewProps> = ({
   return (
     <div className="h-full relative flex flex-col overflow-hidden isolate bg-[#09090b]">
       {/* Background Image Layer */}
-      {backgroundImage && (
+      {(backgroundImage || aesLnlbes) && (
         <div className="absolute inset-0 -z-10">
           <img
-            src={backgroundImage}
+            src={backgroundImage || aesLnlbes}
             alt=""
             className="w-full h-full object-cover transition-opacity duration-700 opacity-60"
           />

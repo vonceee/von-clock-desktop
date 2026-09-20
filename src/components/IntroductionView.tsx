@@ -8,6 +8,8 @@ import {
   LayoutTemplate,
   GitCommit,
 } from "lucide-react";
+import yunahBg from "../assets/aes/yunah_12282025.jpg";
+import yunahCover from "../assets/aes/yunah_12282025_2.jpg";
 
 interface IntroductionViewProps {
   onClose: () => void;
@@ -71,7 +73,7 @@ export const IntroductionView: React.FC<IntroductionViewProps> = ({
                     </div>
                     <div className="flex items-center justify-center h-full">
                       <img
-                        src="assets/logo/notcuteanymore_logo.svg"
+                        src="assets/logo/von_clock_logo.svg"
                         style={{ filter: "invert(1)", width: "400px" }}
                         alt=""
                       />
@@ -172,7 +174,7 @@ export const IntroductionView: React.FC<IntroductionViewProps> = ({
           {/* Background Image (Blurred) */}
           <div className="absolute inset-0 z-0 select-none">
             <img
-              src="assets/yunah/yunah_12282025.jpg"
+              src={yunahBg}
               alt=""
               className="w-full h-full object-cover opacity-100"
             />
@@ -184,8 +186,8 @@ export const IntroductionView: React.FC<IntroductionViewProps> = ({
             <div className="relative w-72 h-72 md:w-96 md:h-96 bg-[#09090b] border border-white/10 rounded-sm shadow-2xl rotate-3 transition-transform duration-500 group-hover:rotate-0 group-hover:scale-105 overflow-hidden">
               <div className="absolute" />
               <img
-                src="assets/yunah/yunah_12282025_2.jpg"
-                alt="Not Cute Anymore - Super Real Me Cover"
+                src={yunahCover}
+                alt="VON.CLOCK - Super Real Me Cover"
                 className="absolute inset-0 w-full h-full object-cover"
                 onError={(e) => {
                   e.currentTarget.style.display = "none";
