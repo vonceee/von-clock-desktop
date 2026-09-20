@@ -12,5 +12,6 @@ A standalone daily routine dashboard built with **Electron**, **React 19**, and 
 npm install
 npm run dev           # Run web dev server at http://localhost:5173
 npm run dev:electron  # Run desktop Electron app with live reload
-npm run build         # Build production bundle
+npm run build         # Build production web bundle
+npm run dist          # Package into Windows .exe installer and portable app
 ```

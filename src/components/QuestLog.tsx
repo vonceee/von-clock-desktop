@@ -32,13 +32,11 @@ export const QuestLog: React.FC<QuestLogProps> = ({
     const statusA = getTaskStatus(a);
     const statusB = getTaskStatus(b);
 
-    // 1. Sort by Priority: ACTIVE (top) -> PENDING -> COMPLETED (bottom)
     const priority = { ACTIVE: 0, PENDING: 1, COMPLETED: 2 };
     if (priority[statusA] !== priority[statusB]) {
       return priority[statusA] - priority[statusB];
     }
 
-    // 2. Sort by Time
     return a.startTime.localeCompare(b.startTime);
   });
 

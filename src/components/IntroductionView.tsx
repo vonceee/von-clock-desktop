@@ -3,9 +3,6 @@ import {
   X,
   Zap,
   Shield,
-  Clock,
-  MousePointerClick,
-  LayoutTemplate,
   GitCommit,
 } from "lucide-react";
 import yunahBg from "../assets/aes/yunah_12282025.jpg";
