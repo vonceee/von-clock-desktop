@@ -44,7 +44,7 @@ export const QuestLog: React.FC<QuestLogProps> = ({
 
   return (
     <div className="h-full flex flex-col overflow-hidden bg-[#09090b] border-l border-white/5">
-      <div className="flex items-center justify-between px-6 py-4 border-b border-white/5">
+      <div className="flex items-center justify-between px-6 py-4.5 border-b border-white/5">
         <h1 className="uppercase tracking-widest text-[#5f6368]">Queue</h1>
         <div className="text-[10px] text-[#5f6368]">
           {currentTime.toLocaleTimeString([], {

@@ -71,13 +71,6 @@ export const IntroductionView: React.FC<IntroductionViewProps> = ({
                         v1.1.0 --stable release
                       </span>
                     </div>
-                    <div className="flex items-center justify-center h-full">
-                      <img
-                        src="assets/logo/von_clock_logo.svg"
-                        style={{ filter: "invert(1)", width: "400px" }}
-                        alt=""
-                      />
-                    </div>
 
                     <p className="text-lg md:text-xl text-[#9aa0a6] font-light leading-relaxed border-l-2 border-[#E1306C] pl-4 py-2">
                       plan and visualize your day through a structured,{" "}
@@ -88,30 +81,6 @@ export const IntroductionView: React.FC<IntroductionViewProps> = ({
                       segment representing a specific task or routine scheduled
                       throughout the day.
                     </p>
-                  </div>
-
-                  {/* Feature Grid */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-8">
-                    <Feature
-                      icon={<Clock className="w-5 h-5" />}
-                      title="Routine Cloning"
-                      desc="copy routines to other days while keeping each day customizable."
-                    />
-                    <Feature
-                      icon={<MousePointerClick className="w-5 h-5" />}
-                      title="Quick Notes"
-                      desc="quickly add or update notes for any task."
-                    />
-                    <Feature
-                      icon={<LayoutTemplate className="w-5 h-5" />}
-                      title="Active Task View"
-                      desc="shows the current task, remaining time, and notes at a glance."
-                    />
-                    <Feature
-                      icon={<Shield className="w-5 h-5" />}
-                      title="Focus Isolation"
-                      desc="clean, distraction-free design focused on clarity."
-                    />
                   </div>
                 </div>
               ) : (

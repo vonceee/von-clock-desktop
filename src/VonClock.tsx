@@ -10,6 +10,8 @@ import {
   ChevronDown,
   RotateCcw,
   Info,
+  PanelLeftClose,
+  PanelLeftOpen,
 } from "lucide-react";
 import { IntroductionView } from "./components/IntroductionView";
 import aesLnlbes from "./assets/aes/aes_lnlbes.jpg";
@@ -32,7 +34,15 @@ const SHORT_DAY_NAMES: Record<string, string> = {
   Sunday: "Su",
 };
 
-export const VonClock: React.FC = () => {
+interface VonClockProps {
+  isSidebarOpen?: boolean;
+  onToggleSidebar?: () => void;
+}
+
+export const VonClock: React.FC<VonClockProps> = ({
+  isSidebarOpen,
+  onToggleSidebar,
+}) => {
   const {
     currentDay,
     setCurrentDay,
@@ -120,17 +130,25 @@ export const VonClock: React.FC = () => {
     <div className="h-full w-full flex flex-col bg-black relative overflow-hidden rounded-lg">
       {/* Header */}
       <header className="flex flex-col lg:flex-row lg:items-center justify-between px-6 py-4 border-b border-white/5 gap-4 lg:gap-0 bg-[#09090b]">
-        {/* Left Side: Logo & Day Selector */}
-        <div className="flex items-center gap-6">
-          <div className="flex items-center gap-3">
-            <img
-              src="assets/logo/von_clock_logo.svg"
-              style={{ filter: "invert(1)", width: "100px", opacity: 0.8 }}
-              alt=""
-            />
-          </div>
-
-          <div className="hidden lg:block h-4 w-[1px] bg-white/10" />
+        {/* Left Side: Day Selector */}
+        <div className="flex items-center gap-3">
+          {onToggleSidebar && (
+            <>
+              <button
+                onClick={onToggleSidebar}
+                className="p-1.5 hover:bg-white/10 rounded-lg text-[#5f6368] hover:text-[#e8eaed] transition-colors"
+                title={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+                aria-label={isSidebarOpen ? "Collapse Sidebar" : "Expand Sidebar"}
+              >
+                {isSidebarOpen ? (
+                  <PanelLeftClose size={16} />
+                ) : (
+                  <PanelLeftOpen size={16} />
+                )}
+              </button>
+              <div className="h-4 w-[1px] bg-white/10" />
+            </>
+          )}
 
           {/* Minimal Day List Header */}
           <div className="flex items-center gap-1 overflow-hidden">

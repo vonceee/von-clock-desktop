@@ -99,20 +99,15 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
         {/* Header */}
         <div className="px-6 py-4 border-b border-white/10 flex justify-between items-center flex-shrink-0">
           <div>
-            <h2 className="text-lg font-medium text-[#e8eaed] mb-0.5">
-              {isCopyMode ? "Copy Routine" : "Edit Routine"}
-            </h2>
-            <p className="text-xs text-[#9aa0a6]">
-              {isCopyMode ? (
-                "Select days to copy to"
-              ) : (
-                <>
-                  <span className="text-[#E1306C] font-medium uppercase tracking-wider">
-                    {day}
-                  </span>
-                </>
-              )}
-            </p>
+            <div className="flex items-center gap-2.5">
+              <h2 className="text-lg font-medium text-[#e8eaed]">
+                {isCopyMode ? "Copy Routine" : "Edit Routine"}
+              </h2>
+              <div className="h-4 w-[1px] bg-white/10" />
+              <span className="text-xs font-medium text-[#E1306C] uppercase tracking-wider">
+                {day}
+              </span>
+            </div>
           </div>
           {!isEmbedded && (
             <button
