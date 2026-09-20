@@ -109,14 +109,12 @@ export const VonClock: React.FC<VonClockProps> = ({
   }, [activeTask, backgroundImages]);
 
   const handleSaveRoutine = (newTasks: Task[]) => {
-    saveDayRoutine(newTasks);
+    saveDayRoutine(newTasks, currentDay);
     setIsEditing(false);
   };
 
   const handleCopyRoutine = (tasks: Task[], targetDays: DayOfWeek[]) => {
-    copyRoutineToDays(tasks, targetDays);
-    // editor closes itself via its own logic
-    // but RoutineEditor calls onClose() internally after copy confirm.
+    copyRoutineToDays(tasks, targetDays, currentDay);
     setIsEditing(false);
   };
 
@@ -230,6 +228,7 @@ export const VonClock: React.FC<VonClockProps> = ({
             <IntroductionView onClose={() => setShowIntro(false)} />
           ) : showEditor ? (
             <RoutineEditor
+              key={currentDay}
               day={currentDay}
               tasks={currentDayTasks}
               onSave={handleSaveRoutine}
@@ -256,6 +255,7 @@ export const VonClock: React.FC<VonClockProps> = ({
 
       {isEditing && isToday && (
         <RoutineEditor
+          key={`modal-${currentDay}`}
           day={currentDay}
           tasks={currentDayTasks}
           onSave={handleSaveRoutine}

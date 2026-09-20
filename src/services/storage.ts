@@ -1,4 +1,5 @@
 import { Task, DailyRoutines, DayOfWeek } from "../types";
+import { createInitialRoutines } from "../constants/defaults";
 
 declare global {
   interface Window {
@@ -43,18 +44,11 @@ export const routineStorage = {
   },
 
   async saveDayRoutine(day: DayOfWeek, tasks: Task[]): Promise<void> {
-    const existing = (await this.fetchRoutines()) || {};
+    const existing = (await this.fetchRoutines()) || createInitialRoutines();
     const base: DailyRoutines = {
-      Monday: [],
-      Tuesday: [],
-      Wednesday: [],
-      Thursday: [],
-      Friday: [],
-      Saturday: [],
-      Sunday: [],
       ...existing,
+      [day]: tasks,
     };
-    base[day] = tasks;
     await this.saveRoutines(base);
   },
 

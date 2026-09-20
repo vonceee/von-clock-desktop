@@ -1,62 +1,14 @@
 import React, { createContext, useContext, useState, useEffect, useMemo, useCallback } from "react";
 import { Task, TaskStatus, DailyRoutines, DayOfWeek } from "../types";
 import { routineStorage as routineApi } from "../services/storage";
+import {
+  DEFAULT_TASKS,
+  INITIAL_ROUTINES,
+  DAYS,
+  createDefaultTasks,
+} from "../constants/defaults";
 
-export const DEFAULT_TASKS: Task[] = [
-  {
-    id: "1",
-    title: "Welcome to VON.CLOCK",
-    notes: "This is your daily execution queue. Click 'Edit Routine' to begin.",
-    startTime: "09:00",
-    durationMinutes: 1440,
-    status: TaskStatus.PENDING,
-    dependencies: [],
-    requirements: [],
-  },
-  {
-    id: "2",
-    title: "Customize Your Schedule",
-    notes: "Tasks here update in real-time based on your system clock.",
-    startTime: "11:58",
-    durationMinutes: 60,
-    status: TaskStatus.PENDING,
-    dependencies: [],
-    requirements: [],
-  },
-  {
-    id: "3",
-    title: "Plan Your Week",
-    notes:
-      "Use the day selector above to switch views and copy routines between days.",
-    startTime: "11:59",
-    durationMinutes: 30,
-    status: TaskStatus.PENDING,
-    dependencies: [],
-    requirements: [],
-  },
-];
-
-const createDefaults = () => JSON.parse(JSON.stringify(DEFAULT_TASKS));
-
-export const INITIAL_ROUTINES: DailyRoutines = {
-  Monday: createDefaults(),
-  Tuesday: createDefaults(),
-  Wednesday: createDefaults(),
-  Thursday: createDefaults(),
-  Friday: createDefaults(),
-  Saturday: createDefaults(),
-  Sunday: createDefaults(),
-};
-
-export const DAYS: DayOfWeek[] = [
-  "Monday",
-  "Tuesday",
-  "Wednesday",
-  "Thursday",
-  "Friday",
-  "Saturday",
-  "Sunday",
-];
+export { DEFAULT_TASKS, INITIAL_ROUTINES, DAYS };
 
 export const getTodayDayOfWeek = (): DayOfWeek => {
   const dayNames: DayOfWeek[] = [
@@ -136,6 +88,11 @@ const useScheduleState = () => {
     };
   }, []);
 
+  const routinesRef = React.useRef<DailyRoutines>(routines);
+  useEffect(() => {
+    routinesRef.current = routines;
+  }, [routines]);
+
   // --- Computed ---
 
   const currentDayTasks = useMemo(
@@ -146,16 +103,19 @@ const useScheduleState = () => {
   // --- Actions ---
 
   const saveDayRoutine = useCallback(
-    async (newTasks: Task[]) => {
-      const tasksToSave = JSON.parse(JSON.stringify(newTasks));
+    async (newTasks: Task[], targetDay?: DayOfWeek) => {
+      const dayToSave = targetDay || currentDay;
+      const tasksToSave: Task[] = JSON.parse(JSON.stringify(newTasks));
 
       try {
-        setRoutines((prev) => ({
-          ...prev,
-          [currentDay]: tasksToSave,
-        }));
+        const nextRoutines: DailyRoutines = {
+          ...routinesRef.current,
+          [dayToSave]: tasksToSave,
+        };
+        routinesRef.current = nextRoutines;
+        setRoutines(nextRoutines);
 
-        await routineApi.saveDayRoutine(currentDay, tasksToSave);
+        await routineApi.saveRoutines(nextRoutines);
         window.dispatchEvent(new Event("schedule-update"));
       } catch (error) {
         console.error("Failed to save routine:", error);
@@ -165,28 +125,35 @@ const useScheduleState = () => {
   );
 
   const copyRoutineToDays = useCallback(
-    async (sourceTasks: Task[], targetDays: DayOfWeek[]) => {
-      const tasksToSave = JSON.parse(JSON.stringify(sourceTasks));
+    async (
+      sourceTasks: Task[],
+      targetDays: DayOfWeek[],
+      sourceDay?: DayOfWeek
+    ) => {
+      const fromDay = sourceDay || currentDay;
+      const tasksToSave: Task[] = JSON.parse(JSON.stringify(sourceTasks));
 
       try {
-        setRoutines((prev) => {
-          const newRoutines = { ...prev };
-          targetDays.forEach((day) => {
-            newRoutines[day] = JSON.parse(JSON.stringify(tasksToSave));
-          });
-          return newRoutines;
+        const nextRoutines: DailyRoutines = {
+          ...routinesRef.current,
+          [fromDay]: JSON.parse(JSON.stringify(tasksToSave)),
+        };
+        targetDays.forEach((day) => {
+          nextRoutines[day] = tasksToSave.map((t: Task) => ({
+            ...t,
+            id: Math.random().toString(36).substr(2, 9),
+          }));
         });
+        routinesRef.current = nextRoutines;
+        setRoutines(nextRoutines);
 
-        await Promise.all(
-          targetDays.map((day) => routineApi.saveDayRoutine(day, tasksToSave))
-        );
-
+        await routineApi.saveRoutines(nextRoutines);
         window.dispatchEvent(new Event("schedule-update"));
       } catch (error) {
         console.error("Failed to copy routine:", error);
       }
     },
-    []
+    [currentDay]
   );
 
   return {

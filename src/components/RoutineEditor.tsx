@@ -24,10 +24,16 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
   ]);
   const [isCopyMode, setIsCopyMode] = React.useState(false);
   const [selectedDays, setSelectedDays] = React.useState<DayOfWeek[]>([]);
+  const [copyFeedback, setCopyFeedback] = React.useState<string | null>(null);
+  const [saveFeedback, setSaveFeedback] = React.useState<string | null>(null);
 
   React.useEffect(() => {
     setLocalTasks([...(tasks || [])]);
-  }, [tasks]);
+    setIsCopyMode(false);
+    setSelectedDays([]);
+    setCopyFeedback(null);
+    setSaveFeedback(null);
+  }, [day, tasks]);
 
   const ALL_DAYS: DayOfWeek[] = [
     "Monday",
@@ -38,6 +44,11 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
     "Saturday",
     "Sunday",
   ];
+
+  const availableTargetDays = React.useMemo(
+    () => ALL_DAYS.filter((d) => d !== day),
+    [day]
+  );
 
   const addTask = () => {
     const newTask: Task = {
@@ -65,14 +76,24 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
 
   const handleSave = () => {
     onSave(localTasks);
-    if (!isEmbedded) onClose();
+    setSaveFeedback("Saved!");
+    setTimeout(() => {
+      setSaveFeedback(null);
+      if (!isEmbedded) onClose();
+    }, isEmbedded ? 2000 : 350);
   };
 
   const handleCopyConfirm = () => {
     if (onCopy && selectedDays.length > 0) {
+      const count = selectedDays.length;
       onCopy(localTasks, selectedDays);
       setIsCopyMode(false);
-      if (!isEmbedded) onClose();
+      setSelectedDays([]);
+      setCopyFeedback(`Copied to ${count} ${count === 1 ? "day" : "days"}!`);
+      setTimeout(() => {
+        setCopyFeedback(null);
+        if (!isEmbedded) onClose();
+      }, isEmbedded ? 2500 : 700);
     }
   };
 
@@ -81,6 +102,14 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
       setSelectedDays(selectedDays.filter((day) => day !== d));
     } else {
       setSelectedDays([...selectedDays, d]);
+    }
+  };
+
+  const toggleSelectAllDays = () => {
+    if (selectedDays.length === availableTargetDays.length) {
+      setSelectedDays([]);
+    } else {
+      setSelectedDays([...availableTargetDays]);
     }
   };
 
@@ -107,10 +136,23 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
               <span className="text-xs font-medium text-[#E1306C] uppercase tracking-wider">
                 {day}
               </span>
+              {copyFeedback && (
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#10b981]/15 border border-[#10b981]/30 text-[#10b981] text-xs font-medium">
+                  <Check className="w-3.5 h-3.5" />
+                  <span>{copyFeedback}</span>
+                </div>
+              )}
+              {saveFeedback && (
+                <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-[#10b981]/15 border border-[#10b981]/30 text-[#10b981] text-xs font-medium">
+                  <Check className="w-3.5 h-3.5" />
+                  <span>{saveFeedback}</span>
+                </div>
+              )}
             </div>
           </div>
           {!isEmbedded && (
             <button
+              type="button"
               onClick={onClose}
               className="p-2 hover:bg-white/10 rounded-full transition-colors duration-200"
               aria-label="Close"
@@ -219,39 +261,57 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
               </button>
             </>
           ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {ALL_DAYS.filter((d) => d !== day).map((d) => (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between pb-1">
+                <p className="text-xs text-[#9aa0a6]">
+                  Select days to copy {day}'s routine ({localTasks.length} {localTasks.length === 1 ? "task" : "tasks"}):
+                </p>
                 <button
-                  key={d}
-                  onClick={() => toggleDaySelection(d)}
-                  className={`p-4 rounded-xl border-2 flex items-center justify-between transition-all duration-200 group ${
-                    selectedDays.includes(d)
-                      ? "border-[#E1306C] bg-[#E1306C]/10"
-                      : "border-white/20 bg-[#121212] hover:border-[#E1306C]/50"
-                  }`}
+                  type="button"
+                  onClick={toggleSelectAllDays}
+                  className="text-xs font-medium text-[#E1306C] hover:text-[#C13584] transition-colors"
                 >
-                  <span
-                    className={`font-medium ${
-                      selectedDays.includes(d)
-                        ? "text-[#E1306C]"
-                        : "text-[#e8eaed]"
-                    }`}
-                  >
-                    {d}
-                  </span>
-                  <div
-                    className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
-                      selectedDays.includes(d)
-                        ? "border-[#E1306C] bg-[#E1306C]"
-                        : "border-[#5f6368] group-hover:border-[#9aa0a6]"
-                    }`}
-                  >
-                    {selectedDays.includes(d) && (
-                      <Check className="w-4 h-4 text-white" />
-                    )}
-                  </div>
+                  {selectedDays.length === availableTargetDays.length
+                    ? "Deselect All"
+                    : "Select All"}
                 </button>
-              ))}
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {availableTargetDays.map((d) => (
+                  <button
+                    key={d}
+                    type="button"
+                    onClick={() => toggleDaySelection(d)}
+                    className={`p-4 rounded-xl border-2 flex items-center justify-between transition-all duration-200 group ${
+                      selectedDays.includes(d)
+                        ? "border-[#E1306C] bg-[#E1306C]/10"
+                        : "border-white/20 bg-[#121212] hover:border-[#E1306C]/50"
+                    }`}
+                  >
+                    <span
+                      className={`font-medium ${
+                        selectedDays.includes(d)
+                          ? "text-[#E1306C]"
+                          : "text-[#e8eaed]"
+                      }`}
+                    >
+                      {d}
+                    </span>
+                    <div
+                      className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-colors ${
+                        selectedDays.includes(d)
+                          ? "border-[#E1306C] bg-[#E1306C]"
+                          : "border-[#5f6368] group-hover:border-[#9aa0a6]"
+                      }`}
+                    >
+                      {selectedDays.includes(d) && (
+                        <Check className="w-4 h-4 text-white" />
+                      )}
+                    </div>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
         </div>
@@ -260,7 +320,8 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
         <div className="px-6 py-4 border-t border-white/10 flex justify-end gap-3 flex-shrink-0">
           {!isEmbedded && (
             <button
-              onClick={isCopyMode ? () => setIsCopyMode(false) : onClose}
+              type="button"
+              onClick={isCopyMode ? () => { setIsCopyMode(false); setSelectedDays([]); } : onClose}
               className="px-4 py-2 text-xs font-medium text-[#9aa0a6] hover:text-[#e8eaed] rounded-lg transition-all duration-200"
             >
               {isCopyMode ? "Back" : "Cancel"}
@@ -268,7 +329,8 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
           )}
           {isEmbedded && isCopyMode && (
             <button
-              onClick={() => setIsCopyMode(false)}
+              type="button"
+              onClick={() => { setIsCopyMode(false); setSelectedDays([]); }}
               className="px-4 py-2 text-xs font-medium text-[#9aa0a6] hover:text-[#e8eaed] rounded-lg transition-all duration-200"
             >
               Back
@@ -277,6 +339,7 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
 
           {onCopy && !isCopyMode && (
             <button
+              type="button"
               onClick={() => setIsCopyMode(true)}
               className="px-4 py-2 bg-white/5 hover:bg-white/10 text-[#e8eaed] text-xs font-medium rounded-lg flex items-center gap-2 transition-all duration-200"
             >
@@ -287,6 +350,7 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
 
           {isCopyMode ? (
             <button
+              type="button"
               onClick={handleCopyConfirm}
               disabled={selectedDays.length === 0}
               className={`px-4 py-2 text-xs font-medium rounded-lg flex items-center gap-2 transition-all duration-200 ${
@@ -300,11 +364,20 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
             </button>
           ) : (
             <button
+              type="button"
               onClick={handleSave}
-              className="px-4 py-2 bg-[#E1306C] hover:bg-[#C13584] text-white text-xs font-medium rounded-lg flex items-center gap-2 transition-all duration-200 shadow-lg shadow-[#E1306C]/20"
+              className={`px-4 py-2 text-white text-xs font-medium rounded-lg flex items-center gap-2 transition-all duration-200 shadow-lg ${
+                saveFeedback
+                  ? "bg-[#10b981] shadow-[#10b981]/20"
+                  : "bg-[#E1306C] hover:bg-[#C13584] shadow-[#E1306C]/20"
+              }`}
             >
-              <Save className="w-3.5 h-3.5" />
-              Save Routine
+              {saveFeedback ? (
+                <Check className="w-3.5 h-3.5" />
+              ) : (
+                <Save className="w-3.5 h-3.5" />
+              )}
+              {saveFeedback ? "Routine Saved!" : "Save Routine"}
             </button>
           )}
         </div>
