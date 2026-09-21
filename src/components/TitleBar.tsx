@@ -1,7 +1,7 @@
 import React from "react";
 import { Minus, Square, X, EyeClosed } from "lucide-react";
 
-export const TitleBar: React.FC = () => {
+export const TitleBar: React.FC = React.memo(() => {
   const isDesktop = typeof window !== "undefined" && Boolean(window.electronAPI?.isDesktop);
 
   return (
@@ -42,4 +42,4 @@ export const TitleBar: React.FC = () => {
       )}
     </header>
   );
-};
+});

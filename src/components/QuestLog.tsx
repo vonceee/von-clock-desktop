@@ -8,7 +8,7 @@ interface QuestLogProps {
   isLoading?: boolean;
 }
 
-export const QuestLog: React.FC<QuestLogProps> = ({
+export const QuestLog: React.FC<QuestLogProps> = React.memo(({
   tasks,
   currentTime,
   isLoading = false,
@@ -163,4 +163,4 @@ export const QuestLog: React.FC<QuestLogProps> = ({
       </div>
     </div>
   );
-};
+});

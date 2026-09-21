@@ -32,9 +32,23 @@ const useScheduleState = () => {
 
   // --- Effects ---
 
-  // Timer
+  // Timer: Only update state when the minute changes to avoid re-rendering the whole app every second
   useEffect(() => {
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
+    const updateTime = () => {
+      const now = new Date();
+      setCurrentTime((prev) => {
+        if (
+          prev.getMinutes() === now.getMinutes() &&
+          prev.getHours() === now.getHours() &&
+          prev.getDate() === now.getDate()
+        ) {
+          return prev;
+        }
+        return now;
+      });
+    };
+
+    const timer = setInterval(updateTime, 1000);
     return () => clearInterval(timer);
   }, []);
 

@@ -11,7 +11,7 @@ interface RoutineEditorProps {
   isEmbedded?: boolean;
 }
 
-export const RoutineEditor: React.FC<RoutineEditorProps> = ({
+export const RoutineEditor: React.FC<RoutineEditorProps> = React.memo(({
   day,
   tasks,
   onSave,
@@ -384,4 +384,4 @@ export const RoutineEditor: React.FC<RoutineEditorProps> = ({
       </div>
     </Container>
   );
-};
+});

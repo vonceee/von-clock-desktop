@@ -58,22 +58,7 @@ export const VonClock: React.FC<VonClockProps> = ({
   const [showIntro, setShowIntro] = useState(false);
 
   // Asset Loading
-  const backgroundImages = useMemo(() => {
-    const images = import.meta.glob(
-      "./assets/aes/*.{png,jpg,jpeg,svg}",
-      {
-        eager: true,
-        query: "?url",
-        import: "default",
-      },
-    );
-    // Exclude album cover assets so notes section only uses aes_lnlbes
-    const filtered = Object.entries(images)
-      .filter(([path]) => !path.toLowerCase().includes("yunah"))
-      .map(([, url]) => url as string);
-
-    return filtered.length > 0 ? filtered : [aesLnlbes];
-  }, []);
+  const backgroundImages = useMemo(() => [aesLnlbes], []);
 
   const activeTask = useMemo(() => {
     const nowHours = currentTime.getHours();

@@ -55,6 +55,11 @@ ipcMain.handle('window:close', () => {
   if (mainWindow) mainWindow.close();
 });
 
+const isDev = !app.isPackaged && process.env.NODE_ENV !== 'production';
+
+// Memory and performance optimization flags
+app.commandLine.appendSwitch('enable-features', 'TrimOnMemoryPressure');
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1320,
@@ -68,10 +73,12 @@ function createWindow() {
       preload: path.join(__dirname, 'preload.cjs'),
       nodeIntegration: false,
       contextIsolation: true,
+      spellcheck: false,
+      backgroundThrottling: true,
+      devTools: isDev,
     },
   });
 
-  const isDev = !app.isPackaged && process.env.NODE_ENV !== 'production';
   if (isDev) {
     mainWindow.loadURL('http://localhost:5173');
     mainWindow.webContents.openDevTools();
